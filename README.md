@@ -1,6 +1,6 @@
 # typescript-compilation-example
 
-An example of compiling in-memory TypeScript code within TypeScript!
+An example of checking and compiling in-memory TypeScript code within TypeScript!
 
 ## Setup
 

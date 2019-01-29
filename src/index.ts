@@ -11,14 +11,23 @@ const code
     ;
 
 //
-// Analyze in-memory TypeScript code for errors.
+// Result of compiling TypeScript code.
 //
-function diagnoseCode(code: string, libs: string[]): ReadonlyArray<ts.Diagnostic> {
+export interface CompilationResult {
+    code?: string;
+    diagnostics: ts.Diagnostic[]
+};
+
+//
+// Check and compile in-memory TypeScript code for errors.
+//
+function compileTypeScriptCode(code: string, libs: string[]): CompilationResult {
     const options = ts.getDefaultCompilerOptions();
     const realHost = ts.createCompilerHost(options, true);
     
     const dummyFilePath = "/in-memory-file.ts";
     const dummySourceFile = ts.createSourceFile(dummyFilePath, code, ts.ScriptTarget.Latest);
+    let outputCode: string | undefined = undefined;
     
     const host: ts.CompilerHost = {
         fileExists: filePath => filePath === dummyFilePath || realHost.fileExists(filePath),
@@ -35,21 +44,32 @@ function diagnoseCode(code: string, libs: string[]): ReadonlyArray<ts.Diagnostic
             ? code 
             : realHost.readFile(filePath),
         useCaseSensitiveFileNames: () => realHost.useCaseSensitiveFileNames(),
-        writeFile: realHost.writeFile.bind(realHost),
+        writeFile: (fileName, data) => outputCode = data,
     };
     
     const rootNames = libs.map(lib => require.resolve(`typescript/lib/lib.${lib}.d.ts`));
     const program = ts.createProgram(rootNames.concat([dummyFilePath]), options, host);
-    return ts.getPreEmitDiagnostics(program);
+    const emitResult = program.emit();
+    const diagnostics = ts.getPreEmitDiagnostics(program);
+    return {
+        code: outputCode,
+        diagnostics: emitResult.diagnostics.concat(diagnostics)
+    };
 }
 
 console.log("==== Evaluating code ====");
 console.log(code);
-console.log("=========================");
+console.log();
 
 const libs = [ 'es2015' ];
-const diagnostics = diagnoseCode(code, libs);
-console.log("Diagnosics:");
-for (const diagnostic of diagnostics) {
+const result = compileTypeScriptCode(code, libs);
+
+console.log("==== Output code ====");
+console.log(result.code);
+console.log();
+
+console.log("==== Diagnostics ====");
+for (const diagnostic of result.diagnostics) {
     console.log(diagnostic.messageText);
 }
+console.log();

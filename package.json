@@ -1,7 +1,7 @@
 {
     "name": "typescript-compilation-example",
     "version": "1.0.0",
-    "description": "An example of compiling in-memory TypeScript code within TypeScript!",
+    "description": "An example of checking and compiling in-memory TypeScript code within TypeScript!",
     "main": "build/index.js",
     "types": "build/index.d.ts",
     "scripts": {
