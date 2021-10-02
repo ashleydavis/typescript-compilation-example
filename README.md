@@ -2,6 +2,8 @@
 
 An example of checking and compiling in-memory TypeScript code within TypeScript!
 
+[Click here to support my work](https://www.codecapers.com.au/about#support-my-work)
+
 ## Setup
 
 Install dependencies:
